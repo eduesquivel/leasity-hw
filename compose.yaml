@@ -10,6 +10,9 @@
         DB_USER: ${DB_USER}
         DB_PASSWORD: ${DB_PASSWORD}
         DB_NAME: ${DB_NAME}
+        GOOGLE_CREDENTIALS_FILE: ${GOOGLE_CREDENTIALS_FILE}
+        SPREADSHEET_ID: ${SPREADSHEET_ID}
+        SHEET_NAME: ${SHEET_NAME}
       depends_on:
         - database
 
