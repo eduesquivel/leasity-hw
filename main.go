@@ -43,14 +43,6 @@ func main() {
   // Create a Gin router with default middleware (logger and recovery)
   r := gin.Default()
 
-  // Define a simple GET endpoint
-  r.GET("/ping", func(c *gin.Context) {
-    // Return JSON response
-    c.JSON (http.StatusOK, gin.H{
-      "message": "pong",
-    })
-  })
-
   r.POST("/webhooks/payments", func(c *gin.Context) {
 		var payment Payment
 
@@ -64,8 +56,8 @@ func main() {
 			if errors.Is(err, gorm.ErrDuplicatedKey) {
 				log.Print("ERROR: Duplicated event on payment ", payment)
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
 			}
+			return
 
 		}
 		c.JSON(http.StatusOK, payment)
