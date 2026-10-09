@@ -3,7 +3,7 @@
       build: .
       container_name: leasity-hw
       ports:
-        - "8080:8080"
+        - "80:80"
       environment:
         DB_HOST: database
         DB_PORT: 5432

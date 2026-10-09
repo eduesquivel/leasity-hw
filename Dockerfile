@@ -9,6 +9,6 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /leasity-hw
 
-EXPOSE 8080
+EXPOSE 80
 
 CMD ["/leasity-hw"]
