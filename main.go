@@ -1,15 +1,16 @@
 package main
 
 import (
-  "fmt"
-  "log"
-  "net/http"
-  "os"
+	"errors"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
 
-  "gorm.io/driver/postgres"
-  "gorm.io/gorm"
-  "github.com/gin-gonic/gin"
-  "github.com/joho/godotenv"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Payment struct {
@@ -29,7 +30,7 @@ func main() {
 
   dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
     os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
-  db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+  db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{TranslateError: true})
   if err != nil {
     panic("failed to connect database")
   }
@@ -51,18 +52,20 @@ func main() {
 		var payment Payment
 
 		if err := c.ShouldBindJSON(&payment); err != nil {
-      c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-      return
+		  c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		  return
 		}
 
     err = gorm.G[Payment](db).Create(c, &payment)
 		if err != nil {
-			// handle!
-			return
+			if errors.Is(err, gorm.ErrDuplicatedKey) {
+				log.Print("ERROR: Duplicated event on payment ", payment)
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
 		}
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK",
-		})
+		c.JSON(http.StatusOK, payment)
   })
 
 	r.GET("/payments/:id", func(c *gin.Context) {
@@ -71,6 +74,7 @@ func main() {
 		payment, err := gorm.G[Payment](db).Where("payment_id = ?", id).First(c)
 
 		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
 
