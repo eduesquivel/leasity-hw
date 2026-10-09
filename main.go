@@ -9,6 +9,7 @@ import (
   "gorm.io/driver/postgres"
   "gorm.io/gorm"
   "github.com/gin-gonic/gin"
+  "github.com/joho/godotenv"
 )
 
 type Payment struct {
@@ -21,6 +22,10 @@ type Payment struct {
 
 
 func main() {
+
+  if err := godotenv.Load(); err != nil {
+    log.Println("no .env file, using environment")
+  }
 
   dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
     os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
@@ -51,10 +56,27 @@ func main() {
 		}
 
     err = gorm.G[Payment](db).Create(c, &payment)
+		if err != nil {
+			// handle!
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK",
 		})
   })
+
+	r.GET("/payments/:id", func(c *gin.Context) {
+		id := c.Param("id")
+
+		payment, err := gorm.G[Payment](db).Where("payment_id = ?", id).First(c)
+
+		if err != nil {
+			return
+		}
+
+		c.JSON(http.StatusOK, payment)
+
+	})
 
 
   // Start server on port 8080 (default)
