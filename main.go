@@ -12,11 +12,11 @@ import (
 )
 
 type Payment struct {
-	EventID string			`gorm:"primaryKey" form:"event_id" binding:"required"`
-	PaymentID string		`form:"payment_id" binding:"required"`
-	Amount uint				`form:"amount" binding:"required"`
-	Status string			`form:"status" binding:"required"`
-	Timestamp string		`form:"timestamp" binding:"required"`
+	EventID string			`gorm:"primaryKey" json:"event_id" binding:"required"`
+	PaymentID string		`json:"payment_id" binding:"required"`
+	Amount uint				`json:"amount" binding:"required"`
+	Status string			`json:"status" binding:"required"`
+	Timestamp string		`json:"timestamp" binding:"required"`
 }
 
 
