@@ -1,3 +1,5 @@
+// falta que el GET sea 1. estado ACTUAL!! y 2. solo status
+
 package main
 
 import (
@@ -6,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -16,9 +19,9 @@ import (
 type Payment struct {
 	EventID string			`gorm:"primaryKey" json:"event_id" binding:"required"`
 	PaymentID string		`json:"payment_id" binding:"required"`
-	Amount uint				`json:"amount" binding:"required"`
-	Status string			`json:"status" binding:"required"`
-	Timestamp string		`json:"timestamp" binding:"required"`
+	Amount uint			  	`json:"amount" binding:"required"`
+	Status string			  `json:"status" binding:"required"`
+	Timestamp time.Time `json:"timestamp" binding:"required"`
 }
 
 
@@ -71,7 +74,7 @@ func main() {
 	r.GET("/payments/:id", func(c *gin.Context) {
 		id := c.Param("id")
 
-		payment, err := gorm.G[Payment](db).Where("payment_id = ?", id).First(c)
+		payment, err := gorm.G[Payment](db).Where("payment_id = ?", id).Order("timestamp DESC").First(c)
 
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
